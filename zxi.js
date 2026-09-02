@@ -1,4 +1,4 @@
-javascript:(function() {
+(function() {
     "use strict";
 
     const RAILWAY_SERVER_URL = "https://zxi-file-loader.ah4734536.workers.dev"; 
@@ -345,7 +345,6 @@ javascript:(function() {
         function triggerAincradExecutionFlow(selectedSeconds, fileSourceUrl, isProxyMode = false) {
             box.remove();
             
-            // 🔥 ৫০ এবং ৭০ ব্যবহার করার সময় অটো গান ও এনিমেশন চালু করার শর্ত
             if (selectedSeconds === 50 || selectedSeconds === 70) {
                 autoPlayMusicAndVisualizer();
             }
@@ -475,7 +474,6 @@ javascript:(function() {
                 <button id="zxi-choice-powerplus" class="zxi-mode-btn" style="margin-bottom:0;">ALL EARNLINKS</button>
             `;
 
-            // 🔥 SECURE = 50s, SAFE = 70s
             document.getElementById('zxi-choice-aincrad').addEventListener('click', () => {
                 box.innerHTML = `
                     <button id="zxi-back-to-main" style="position:absolute;top:15px;left:15px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;font-weight:bold;">❮</button>
@@ -491,7 +489,6 @@ javascript:(function() {
                 document.getElementById('zxi-btn-safe').addEventListener('click', () => triggerAincradExecutionFlow(70, _d.r, false));
             });
 
-            // 🔥 SECURE PROXY = 50s, SAFE PROXY = 70s
             document.getElementById('zxi-choice-aincrad-proxy').addEventListener('click', () => {
                 box.innerHTML = `
                     <button id="zxi-back-to-main" style="position:absolute;top:15px;left:15px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;font-weight:bold;">❮</button>
