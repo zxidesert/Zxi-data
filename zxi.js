@@ -1,5 +1,7 @@
 javascript:(function() {
     "use strict";
+
+    // ⚠️ এখানে আপনার আসল পাইথন রেলওয়ে সার্ভারের ডোমেনটি বসান
     const RAILWAY_SERVER_URL = "https://zxi-file-loader.ah4734536.workers.dev"; 
 
     let userIndex = -1;
@@ -248,7 +250,8 @@ javascript:(function() {
         const statusDiv = document.getElementById('zxi-status');
 
         tgBtn.addEventListener('click', () => window.open(userTelegram, '_blank'));
-        
+
+        // ================== প্রিমিয়াম লোডিং স্ক্রিন (মেঘ, বজ্র, বৃষ্টি, রঙিন ঘূর্ণন) ==================
         function startVisualizerAnimation(selectedSeconds, redirectUrl) {
             const overlay = document.createElement('div');
             overlay.style.cssText = `
@@ -262,7 +265,7 @@ javascript:(function() {
 
                 <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; z-index:2;">
                     <div style="position:relative; width:320px; height:320px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
-                       
+                        <!-- ঘূর্ণায়মান রঙিন রিং -->
                         <div style="position:absolute; width:280px; height:280px; animation: zxi-premium-spin 4s linear infinite;">
                             <svg width="280" height="280" viewBox="0 0 280 280">
                                 <circle cx="140" cy="140" r="120" fill="none" stroke="url(#grad1)" stroke-width="6" stroke-linecap="round" stroke-dasharray="200 400" />
@@ -288,7 +291,7 @@ javascript:(function() {
                             </svg>
                         </div>
 
-                       
+                        <!-- মূল কাউন্টডাউন সার্কেল -->
                         <svg width="240" height="240" style="transform:rotate(-90deg); position:relative; z-index:3;">
                             <circle cx="120" cy="120" r="85" fill="rgba(6,10,23,0.94)" stroke="rgba(255,255,255,0.05)" stroke-width="10"></circle>
                             <circle id="progress" cx="120" cy="120" r="85" fill="none" stroke="#00ccff" stroke-width="10" stroke-dasharray="534" stroke-dashoffset="534" stroke-linecap="round" style="transition: stroke-dashoffset 1s linear;"></circle>
@@ -300,6 +303,7 @@ javascript:(function() {
             `;
             document.body.appendChild(overlay);
 
+            // অতিরিক্ত CSS অ্যানিমেশন
             const extraStyle = document.createElement('style');
             extraStyle.textContent = `
                 @keyframes zxi-premium-spin {
@@ -328,6 +332,7 @@ javascript:(function() {
                 });
             }
 
+            // বৃষ্টির ফোঁটা (ধীর ও বাস্তবসম্মত)
             const raindrops = [];
             const MAX_DROPS = 220; // একটু কমিয়ে ঘনত্ব কমানো
             for (let i = 0; i < MAX_DROPS; i++) {
@@ -341,6 +346,7 @@ javascript:(function() {
                 });
             }
 
+            // বজ্রপাত ফ্ল্যাশ
             let lightningAlpha = 0;
             let lightningBoltPoints = [];
             let lightningVisible = false;
@@ -362,7 +368,7 @@ javascript:(function() {
             }
 
             function scheduleLightning() {
-               
+                // বজ্রপাত এখন ৫-১০ সেকেন্ড পরপর হবে
                 const delay = Math.random() * 5000 + 5000;
                 setTimeout(() => {
                     triggerLightning();
@@ -388,7 +394,7 @@ javascript:(function() {
                 animationFrameId = requestAnimationFrame(drawRain);
                 ctx.clearRect(0, 0, width, height);
 
-               
+                // বজ্রপাতের আলো
                 if (lightningAlpha > 0) {
                     ctx.fillStyle = `rgba(255,255,255,${lightningAlpha})`;
                     ctx.fillRect(0, 0, width, height);
@@ -419,6 +425,7 @@ javascript:(function() {
                     ctx.shadowBlur = 0;
                 }
 
+                // বৃষ্টি (ধীর ও লম্বা)
                 for (const drop of raindrops) {
                     ctx.beginPath();
                     ctx.moveTo(drop.x, drop.y);
@@ -438,6 +445,7 @@ javascript:(function() {
                     if (drop.x < -50) drop.x = width + 50;
                 }
 
+                // নিচের দিকে হালকা স্প্ল্যাশ
                 ctx.fillStyle = 'rgba(255,255,255,0.04)';
                 for (let i = 0; i < 15; i++) {
                     const x = Math.random() * width;
