@@ -122,11 +122,6 @@ javascript:(function() {
                 100% { box-shadow: 0 0 5px #00ffcc, 0 0 10px #00ffcc, inset 0 0 5px rgba(0,255,204,0.2); border-color: #00ffcc; }
             }
             @keyframes zxi-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            @keyframes zxi-bg-shift {
-                0% { background: rgba(3, 7, 18, 0.85); }
-                50% { background: rgba(8, 20, 38, 0.90); }
-                100% { background: rgba(3, 7, 18, 0.85); }
-            }
             
             .zxi-clickable-credit {
                 position: fixed;
@@ -256,93 +251,136 @@ javascript:(function() {
 
         tgBtn.addEventListener('click', () => window.open(userTelegram, '_blank'));
 
+        // ================== রেইন ইফেক্ট সহ নতুন লোডিং স্ক্রিন ==================
         function startVisualizerAnimation(selectedSeconds, redirectUrl) {
             const overlay = document.createElement('div');
             overlay.style.cssText = `
                 position:fixed; top:0; left:0; width:100%; height:100%; 
-                background:rgba(3,7,18,0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); z-index:2147483647; 
-                display:flex; align-items:center; justify-content:center; font-family:system-ui,-apple-system,sans-serif;
-                animation: zxi-bg-shift 6s ease infinite;
-                overflow: hidden;
+                background:rgba(3,7,18,0.4); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); z-index:2147483647; 
+                font-family:system-ui,-apple-system,sans-serif; overflow:hidden;
             `;
 
             overlay.innerHTML = `
-                <canvas id="zxi-rain-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
-                <div style="text-align:center; position:relative; z-index:2;">
-                    <div style="position:relative; width:340px; height:340px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
-                        <svg width="240" height="240" style="transform:rotate(-90deg); position:relative; z-index:3;">
-                            <circle cx="120" cy="120" r="85" fill="rgba(6,10,23,0.85)" stroke="rgba(255,255,255,0.08)" stroke-width="8"></circle>
-                            <circle id="progress" cx="120" cy="120" r="85" fill="none" stroke="#00ffcc" stroke-width="8" stroke-dasharray="534" stroke-dashoffset="534" stroke-linecap="round" style="transition: stroke-dashoffset 1s linear, stroke 0.4s ease, filter 0.4s ease; filter: drop-shadow(0 0 8px rgba(0,255,204,0.6));"></circle>
+                <!-- পূর্ণ স্ক্রীন রেইন ক্যানভাস -->
+                <canvas id="zxi-rain-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;"></canvas>
+
+                <!-- কেন্দ্রীয় কাউন্টডাউন সার্কেল -->
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; z-index:2;">
+                    <div style="position:relative; width:300px; height:300px; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+                        <svg width="240" height="240" style="transform:rotate(-90deg);">
+                            <circle cx="120" cy="120" r="85" fill="rgba(6,10,23,0.94)" stroke="rgba(255,255,255,0.05)" stroke-width="10"></circle>
+                            <circle id="progress" cx="120" cy="120" r="85" fill="none" stroke="#00ccff" stroke-width="10" stroke-dasharray="534" stroke-dashoffset="534" stroke-linecap="round" style="transition: stroke-dashoffset 1s linear;"></circle>
                         </svg>
-                        <div id="countdown-text" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:52px; font-weight:900; color:#fff; text-shadow:0 0 15px #00ffcc; z-index:4;">${selectedSeconds}</div>
+                        <div id="countdown-text" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:52px; font-weight:900; color:#fff; text-shadow:0 0 15px #00ccff;">${selectedSeconds}</div>
                     </div>
-                    <p id="zxi-redirect-label" style="margin-top:20px; color:#00ffcc; font-size:15px; font-weight:700; letter-spacing:3px; text-shadow:0 0 10px rgba(0,255,204,0.4); position:relative; z-index:4;">REDIRECTING...</p>
+                    <p id="zxi-redirect-label" style="margin-top:20px; color:#00ccff; font-size:15px; font-weight:700; letter-spacing:3px; text-shadow:0 0 10px rgba(0,204,255,0.4);">REDIRECTING...</p>
                 </div>
             `;
             document.body.appendChild(overlay);
 
-            // বৃষ্টির ইফেক্ট এবং ব্যাকগ্রাউন্ড আবহ তৈরি করার জন্য ক্যানভাস লজিক
-            const rainCanvas = document.getElementById('zxi-rain-canvas');
-            const rCtx = rainCanvas.getContext('2d');
-            rainCanvas.width = window.innerWidth;
-            rainCanvas.height = window.innerHeight;
+            const canvas = document.getElementById('zxi-rain-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
 
+            // রেইনড্রপ অ্যারে
             const raindrops = [];
-            const maxDrops = 100;
-            for (let i = 0; i < maxDrops; i++) {
+            const MAX_DROPS = 200;
+            for (let i = 0; i < MAX_DROPS; i++) {
                 raindrops.push({
-                    x: Math.random() * rainCanvas.width,
-                    y: Math.random() * rainCanvas.height,
+                    x: Math.random() * width,
+                    y: Math.random() * height,
                     length: Math.random() * 20 + 10,
-                    speed: Math.random() * 6 + 4,
-                    opacity: Math.random() * 0.5 + 0.2
+                    speed: Math.random() * 15 + 10,
+                    opacity: Math.random() * 0.5 + 0.3,
+                    wind: Math.random() * 2 - 1, // সামান্য বাতাসের প্রভাব
                 });
             }
 
+            // বজ্রপাত ফ্ল্যাশ
+            let lightningAlpha = 0;
+            let lightningTimeout = null;
+
+            function triggerLightning() {
+                lightningAlpha = 0.8;
+                setTimeout(() => { lightningAlpha = 0; }, 100);
+                setTimeout(() => { lightningAlpha = 0.6; }, 250);
+                setTimeout(() => { lightningAlpha = 0; }, 350);
+            }
+
+            function scheduleLightning() {
+                lightningTimeout = setTimeout(() => {
+                    triggerLightning();
+                    scheduleLightning();
+                }, Math.random() * 4000 + 2000);
+            }
+            scheduleLightning();
+
             function drawRain() {
                 animationFrameId = requestAnimationFrame(drawRain);
-                rCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+                ctx.clearRect(0, 0, width, height);
 
-                rCtx.lineWidth = 1.5;
-                rCtx.lineCap = 'round';
+                // বজ্রপাতের আলো
+                if (lightningAlpha > 0) {
+                    ctx.fillStyle = `rgba(255,255,255,${lightningAlpha})`;
+                    ctx.fillRect(0, 0, width, height);
+                }
 
-                for (let drop of raindrops) {
-                    let dynamicSpeed = drop.speed;
-                    if (analyser && zxiAudio && !zxiAudio.paused) {
-                        analyser.getByteFrequencyData(dataArray);
-                        let bassSum = (dataArray[2] || 0) + (dataArray[3] || 0);
-                        dynamicSpeed = drop.speed + (bassSum / 40);
+                // রেইনড্রপ আঁকা
+                for (const drop of raindrops) {
+                    ctx.beginPath();
+                    ctx.moveTo(drop.x, drop.y);
+                    ctx.lineTo(drop.x + drop.wind * 5, drop.y + drop.length);
+                    ctx.strokeStyle = `rgba(174,194,224,${drop.opacity})`;
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    // আপডেট অবস্থান
+                    drop.y += drop.speed;
+                    drop.x += drop.wind * 2;
+                    if (drop.y > height) {
+                        drop.y = -drop.length;
+                        drop.x = Math.random() * width;
                     }
-
-                    rCtx.strokeStyle = `rgba(0, 255, 204, ${drop.opacity})`;
-                    rCtx.beginPath();
-                    rCtx.moveTo(drop.x, drop.y);
-                    rCtx.lineTo(drop.x - 1, drop.y + drop.length);
-                    rCtx.stroke();
-
-                    drop.y += dynamicSpeed;
-                    if (drop.y > rainCanvas.height) {
-                        drop.y = -20;
-                        drop.x = Math.random() * rainCanvas.width;
-                    }
+                    if (drop.x > width + 50) drop.x = -50;
+                    if (drop.x < -50) drop.x = width + 50;
                 }
             }
             drawRain();
 
+            // উইন্ডো রিসাইজ হ্যান্ডেল
+            window.addEventListener('resize', () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                // রেইনড্রপ পজিশন সামঞ্জস্য
+                raindrops.forEach(drop => {
+                    drop.x = Math.random() * width;
+                    drop.y = Math.random() * height;
+                });
+            });
+
+            const progressRing = overlay.querySelector('#progress');
+            const countdownText = overlay.querySelector('#countdown-text');
             let timeLeft = selectedSeconds;
-            const progress = overlay.querySelector('#progress');
             const circumference = 534;
 
             const timer = setInterval(() => {
                 timeLeft--;
                 countdownText.textContent = timeLeft;
-                progress.style.strokeDashoffset = circumference * (timeLeft / selectedSeconds);
+                progressRing.style.strokeDashoffset = circumference * (timeLeft / selectedSeconds);
 
                 if (timeLeft <= 0) {
-                    clearInterval(timer); cancelAnimationFrame(animationFrameId);
+                    clearInterval(timer);
+                    cancelAnimationFrame(animationFrameId);
+                    clearTimeout(lightningTimeout);
                     if(zxiAudio) { zxiAudio.pause(); }
                     if(musicBtn) { musicBtn.remove(); }
-                    overlay.remove(); window.location.replace(redirectUrl);
+                    overlay.remove();
+                    window.location.replace(redirectUrl);
                 }
             }, 1000);
         }
@@ -350,6 +388,7 @@ javascript:(function() {
         function triggerAincradExecutionFlow(selectedSeconds, fileSourceUrl, isProxyMode = false) {
             box.remove();
             
+            // 🔥 50 এবং 80 ব্যবহার করার সময় অটো গান ও এনিমেশন চালু করার শর্ত
             if (selectedSeconds === 50 || selectedSeconds === 80) {
                 autoPlayMusicAndVisualizer();
             }
@@ -390,6 +429,7 @@ javascript:(function() {
                 setTimeout(async () => {
                     checkOverlay.remove();
                     try {
+                        // 🔒 ইউজার মিক্সআপ সিকিউরিটি: ফাইল রিকোয়েস্টে নির্দিষ্ট ইউজারের ইনডেক্স পাস করা হচ্ছে
                         const rResp = await fetch(fileSourceUrl + '&user=' + userIndex + '&t=' + Date.now()); 
                         const finalUrl = (await rResp.text()).trim();
                         if(finalUrl.startsWith('http')) { startVisualizerAnimation(selectedSeconds, finalUrl); }
@@ -398,6 +438,7 @@ javascript:(function() {
             }, 3500);
         }
 
+        // 🔥 পাওয়ার ও হান্টার প্লাস মোডের "ইনস্ট্যান্ট কপি বাটন" প্যানেল লজিক
         function triggerPowerZxPanel(engineMode) {
             const isPlus = engineMode === "powerplus";
             const titleText = isPlus ? "ALL EARNLINKS" : "ALL VPLINK'S";
@@ -435,12 +476,14 @@ javascript:(function() {
                 fetchBtn.disabled = true;
 
                 try {
+                    // 🔒 সিকিউরিটি ফিক্স: প্রতিটি ইউজারের আইডি ও লিংক আলাদা রাখতে 'user=' প্যারামিটার যোগ করা হয়েছে
                     const response = await fetch(`${RAILWAY_SERVER_URL}/api/bypass?mode=${engineMode}&user=${userIndex}&url=${encodeURIComponent(urlVal)}`);
                     const data = await response.json();
                     
                     if (data && data.status === "success" && data.bypassed_url) {
                         bStatus.innerHTML = "<span style='color:#00ff96;'>BYPASS SUCCESSFUL! ✓</span>";
                         
+                        // 📋 স্ক্রিনশটের মতো কোনো টাইমার বা রেডি লজিক ছাড়াই ডিরেক্ট ইনস্ট্যান্ট কপি বাটন জেনারেট হচ্ছে
                         fetchBtn.outerHTML = `<button id="zxi-copy-bypass-btn" style="width:100%;background:linear-gradient(90deg, #00ffcc, #00ccff);color:#030712;border:none;padding:12px;border-radius:8px;font-weight:700;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 15px rgba(0,255,204,0.4);animation: zxi-lightning-glow 2s linear infinite;">📋 COPY BYPASS LINK</button>`;
                         
                         document.getElementById('zxi-copy-bypass-btn').addEventListener('click', () => {
@@ -479,6 +522,7 @@ javascript:(function() {
                 <button id="zxi-choice-powerplus" class="zxi-mode-btn zxi-btn-plus">ALL EARNLINKS</button>
             `;
 
+            // ❄️ Aincrad-এর অপশন (FAST, SECURE, SAFE) টাইমার পরিবর্তনসহ (SECURE = 50s, SAFE = 80s)
             document.getElementById('zxi-choice-aincrad').addEventListener('click', () => {
                 box.innerHTML = `
                     <button id="zxi-back-to-main" style="position:absolute;top:15px;left:15px;background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;font-weight:bold;">❮</button>
@@ -494,6 +538,7 @@ javascript:(function() {
                 document.getElementById('zxi-btn-safe').addEventListener('click', () => triggerAincradExecutionFlow(80, _d.r, false));
             });
 
+            // 🛰️ Aincrad Proxy-র অপশন (FAST, SECURE, SAFE) টাইমার পরিবর্তনসহ (SECURE PROXY = 50s, SAFE PROXY = 80s)
             document.getElementById('zxi-choice-aincrad-proxy').addEventListener('click', () => {
                 box.innerHTML = `
                     <button id="zxi-back-to-main" style="position:absolute;top:15px;left:15px;background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;font-weight:bold;">❮</button>
