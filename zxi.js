@@ -332,17 +332,17 @@ javascript:(function() {
                 });
             }
 
-            // বৃষ্টির ফোঁটা
+            // বৃষ্টির ফোঁটা (ধীর ও বাস্তবসম্মত)
             const raindrops = [];
-            const MAX_DROPS = 250;
+            const MAX_DROPS = 220; // একটু কমিয়ে ঘনত্ব কমানো
             for (let i = 0; i < MAX_DROPS; i++) {
                 raindrops.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
-                    length: Math.random() * 22 + 12,
-                    speed: Math.random() * 18 + 12,
-                    opacity: Math.random() * 0.6 + 0.3,
-                    wind: Math.random() * 3 - 1.5,
+                    length: Math.random() * 25 + 20, // লম্বা ফোঁটা (২০-৪৫ পিক্সেল)
+                    speed: Math.random() * 5 + 3,      // ধীর গতি (৩-৮)
+                    opacity: Math.random() * 0.4 + 0.25, // হালকা স্বচ্ছতা
+                    wind: Math.random() * 2 - 1,      // সামান্য বাতাস
                 });
             }
 
@@ -352,17 +352,15 @@ javascript:(function() {
             let lightningVisible = false;
 
             function triggerLightning() {
-                // আলোর ঝলক
                 lightningAlpha = 0.9;
                 lightningVisible = true;
-                // বজ্ররেখার জন্য এলোমেলো পয়েন্ট
                 lightningBoltPoints = [];
                 let x = Math.random() * width;
                 let y = -10;
                 while (y < height * 0.6) {
                     lightningBoltPoints.push({ x, y });
-                    x += Math.random() * 80 - 40;
-                    y += Math.random() * 40 + 20;
+                    x += Math.random() * 60 - 30;
+                    y += Math.random() * 35 + 15;
                 }
                 setTimeout(() => { lightningAlpha = 0; lightningVisible = false; }, 150);
                 setTimeout(() => { lightningAlpha = 0.6; }, 300);
@@ -370,7 +368,8 @@ javascript:(function() {
             }
 
             function scheduleLightning() {
-                const delay = Math.random() * 3000 + 1500;
+                // বজ্রপাত এখন ৫-১০ সেকেন্ড পরপর হবে
+                const delay = Math.random() * 5000 + 5000;
                 setTimeout(() => {
                     triggerLightning();
                     scheduleLightning();
@@ -383,7 +382,6 @@ javascript:(function() {
                 ctx.globalAlpha = cloud.opacity;
                 ctx.fillStyle = '#ffffff';
                 ctx.filter = 'blur(8px)';
-                // মেঘের আকার
                 ctx.beginPath();
                 ctx.arc(cloud.x, cloud.y, 40 * cloud.scale, 0, Math.PI * 2);
                 ctx.arc(cloud.x + 50 * cloud.scale, cloud.y - 20 * cloud.scale, 50 * cloud.scale, 0, Math.PI * 2);
@@ -402,7 +400,7 @@ javascript:(function() {
                     ctx.fillRect(0, 0, width, height);
                 }
 
-                // মেঘ আঁকা ও আপডেট
+                // মেঘ
                 for (const cloud of clouds) {
                     drawCloud(cloud);
                     cloud.x += cloud.speed;
@@ -412,7 +410,7 @@ javascript:(function() {
                     }
                 }
 
-                // বজ্ররেখা আঁকা
+                // বজ্ররেখা
                 if (lightningVisible && lightningBoltPoints.length > 1) {
                     ctx.beginPath();
                     ctx.moveTo(lightningBoltPoints[0].x, lightningBoltPoints[0].y);
@@ -427,18 +425,18 @@ javascript:(function() {
                     ctx.shadowBlur = 0;
                 }
 
-                // বৃষ্টি আঁকা
+                // বৃষ্টি (ধীর ও লম্বা)
                 for (const drop of raindrops) {
                     ctx.beginPath();
                     ctx.moveTo(drop.x, drop.y);
-                    ctx.lineTo(drop.x + drop.wind * 4, drop.y + drop.length);
+                    ctx.lineTo(drop.x + drop.wind * 5, drop.y + drop.length);
                     ctx.strokeStyle = `rgba(174,194,224,${drop.opacity})`;
-                    ctx.lineWidth = 1.8;
+                    ctx.lineWidth = 1.6;
                     ctx.stroke();
 
-                    // অবস্থান আপডেট
+                    // আপডেট
                     drop.y += drop.speed;
-                    drop.x += drop.wind * 1.5;
+                    drop.x += drop.wind * 2;
                     if (drop.y > height) {
                         drop.y = -drop.length;
                         drop.x = Math.random() * width;
@@ -447,17 +445,16 @@ javascript:(function() {
                     if (drop.x < -50) drop.x = width + 50;
                 }
 
-                // নিচের দিকে স্প্ল্যাশ ইফেক্ট (সামান্য সাদা রেখা)
-                ctx.fillStyle = 'rgba(255,255,255,0.05)';
-                for (let i = 0; i < 20; i++) {
+                // নিচের দিকে হালকা স্প্ল্যাশ
+                ctx.fillStyle = 'rgba(255,255,255,0.04)';
+                for (let i = 0; i < 15; i++) {
                     const x = Math.random() * width;
-                    const y = height - Math.random() * 5;
-                    ctx.fillRect(x, y, Math.random() * 6, 1);
+                    const y = height - Math.random() * 8;
+                    ctx.fillRect(x, y, Math.random() * 8, 1);
                 }
             }
             drawRain();
 
-            // রিসাইজ হ্যান্ডেল
             window.addEventListener('resize', () => {
                 width = window.innerWidth;
                 height = window.innerHeight;
