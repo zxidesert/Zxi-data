@@ -1,0 +1,4 @@
+update=0
+link=https://example.com/akatsuki_driver_v2.apk
+version=2.1
+message=New version available with bug fixes
